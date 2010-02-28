@@ -11,7 +11,7 @@ describe Hub, "interface for publishers" do
 
   # New Content Notification Requests - Core Requirements
   # http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.2.html#anchor9
- 
+
   # Section 7.1
   it "SHOULD arrange for a content fetch request after publish notification" do
     request = nil
@@ -22,7 +22,7 @@ describe Hub, "interface for publishers" do
     wait_for { request != nil }
     request.should_not be_nil
 
-    request.method.should == 'GET'
+    request.request_method.should == 'GET'
   end
 
   it "SHOULD include a header field X-Hub-Subscribers whose value is an integer in content fetch request" do

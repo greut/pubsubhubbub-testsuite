@@ -11,7 +11,7 @@ describe Hub, "interface for publishers" do
 
   # New Content Notification Requests - Core Requirements
   # http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.2.html#anchor9
-  
+
   # Section 7.1
   it "MUST accept POST requests for publish notifications" do
     @hub.publish(@topic_url).should be_a_kind_of(Net::HTTPSuccess)
@@ -47,13 +47,13 @@ describe Hub, "interface for publishers" do
   it "MUST return an error if the hub.url parameter is omitted from the request" do
     @hub.post_as_publisher('publish', nil).should be_a_kind_of(Net::HTTPClientError)
   end
-  
+
   it "MUST return 204 No Content if publish notification was accepted" do
     @hub.publish(@topic_url).should be_an_instance_of(Net::HTTPNoContent)
   end
-  
+
   # Section 7.2
- 
+
   it "MUST send an HTTP GET request to the hub.topic URL to fetch the content" do
     # Because GAE-PSH doesn't fetch content unless there are subscriptions, we subscribe
     @request_mode = 'subscribe'
@@ -69,12 +69,12 @@ describe Hub, "interface for publishers" do
   # Section 7.3
   it "MUST send subscribers notification via an HTTP POST request to their callback URL" do
     request = get_publish_notification
-    request.method.should == 'POST'
+    request.request_method.should == 'POST'
   end
 
   it "MUST send notification requests with a Content-Type of application/atom+xml" do
     request = get_publish_notification
-    request.headers['content-type'].should == 'application/atom+xml'
+    request.content_type.should == 'application/atom+xml'
   end
 
   it "MUST include new and changed entries as an Atom feed document in the body of the notification" do
@@ -86,7 +86,7 @@ describe Hub, "interface for publishers" do
     request = get_publish_notification
     pending("verify atom:id elements")
   end
-  
+
   # Section 7.4
   context "with a hub.secret parameter" do
     it "MUST generate an X-Hub-Signature header for notifications" do
@@ -102,9 +102,9 @@ describe Hub, "interface for publishers" do
       wait_for { request != nil }
 
       request.should_not be_nil
-      request.headers.should have_key('X-Hub-Signature')
+      request.header.should have_key('x-hub-signature')
       pending do
-        request.headers['X-Hub-Signature'].should == HMAC::SHA1.hexdigest(secret, 'the-content')
+        request.header['x-hub-signature'][0].should == HMAC::SHA1.hexdigest(secret, 'the-content')
       end
     end
   end

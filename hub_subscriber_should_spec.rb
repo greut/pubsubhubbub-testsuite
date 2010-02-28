@@ -13,7 +13,7 @@ shared_examples_for "fully compliant hubs that obey request semantics" do
   # http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.2.html#anchor5
   # ===============================================================================
   #
- 
+
   # Section 6.1
   it "SHOULD NOT return an error if the verify token is omitted from the request" do
     doRequest(:verify_token => nil).should_not be_a_kind_of(Net::HTTPClientError)

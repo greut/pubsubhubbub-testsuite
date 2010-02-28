@@ -7,7 +7,7 @@ describe Hub, "interface for publishers" do
   context "aggregation" do
     it "MUST return an error code if multiple hub.secret values are provided for subscriptions with the same hub.callback URL" do
       @request_mode = 'subscribe'
-      doRequest(:params => {'hub.secret' => 'firstsecret'}).should be_a_kind_of(Net::HTTPNoContent)
+      doRequest().should be_a_kind_of(Net::HTTPNoContent)
       doRequest(:params => {'hub.secret' => 'secondsecret'}).should be_a_kind_of(Net::HTTPClientError)
     end
 

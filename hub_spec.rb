@@ -33,6 +33,10 @@ end
 describe Hub, "publisher interface" do
   it_should_behave_like "a hub with publisher and subscriber"
 
+  before(:each) do
+    @topic_url = ENV['TOPIC_URL'] || @publisher.content_url
+  end
+
   it "accepts POST request for publish notifications" do
     @hub.publish(@topic_url).should be_a_kind_of(Net::HTTPSuccess)
   end
@@ -119,7 +123,7 @@ describe Hub, "subscriber interface" do
       it "MUST ignore verify keywords it does not understand" do
         @hub.subscribe(@subscriber.accept_callback_url, @topic_url, ['sync','foobar','async'], Subscriber::VERIFY_TOKEN).should be_a_kind_of(Net::HTTPSuccess)
       end
-      
+
     end
   end
 
@@ -128,7 +132,7 @@ describe Hub, "subscriber interface" do
     context "when verifying intent" do
       it "must verify subscriber with a GET request to the callback URL" do
         request_method = nil
-        @subscriber.onrequest = lambda {|req| request_method = req.request_method }
+        @subscriber.on_request = lambda {|req, res| request_method = req.request_method }
         @hub.subscribe(@subscriber.accept_callback_url, @topic_url, 'sync', Subscriber::VERIFY_TOKEN)
         wait_on request_method
         request_method.should == "GET"
@@ -136,7 +140,7 @@ describe Hub, "subscriber interface" do
 
       it "is REQUIRED to include mode, topic and challenge query parameters in the verification request" do
         query_string = nil
-        @subscriber.onrequest = lambda {|req| query_string = req.query_string }
+        @subscriber.on_request = lambda {|req, res| query_string = req.query_string }
         @hub.subscribe(@subscriber.accept_callback_url, @topic_url, 'sync', Subscriber::VERIFY_TOKEN)
         wait_on query_string
         query_string.should include("hub.mode=")
@@ -144,13 +148,13 @@ describe Hub, "subscriber interface" do
         query_string.should include("hub.challenge=")
       end
     end
-    
+
     context "when the subscriber's intent is verified" do
       it "MUST return 204 No Content" do
         @hub.subscribe(@subscriber.accept_callback_url, @topic_url, 'sync', Subscriber::VERIFY_TOKEN).should be_a_kind_of(Net::HTTPNoContent)
       end
     end
-    
+
     context "when the subscriber's intent couldn't be verified" do
       it "MUST consider other client and server response codes to mean subscription is not verified" do
         @hub.subscribe(@subscriber.refuse_callback_url, @topic_url, 'sync', Subscriber::VERIFY_TOKEN).should be_a_kind_of(Net::HTTPClientError)
